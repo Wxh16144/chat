@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  lobe-chat:
+    image: lobehub/lobe-chat
+    container_name: lobe-chat
+    restart: always
+    ports:
+      - "10101:3210"
+    environment:
+      - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
+      - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
+      # - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
+      - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
