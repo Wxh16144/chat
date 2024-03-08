@@ -1,15 +1,34 @@
 version: "3.8"
 
 services:
+  copilot-gpt4-service:
+    image: aaamoon/copilot-gpt4-service:latest
+    container_name: copilot-gpt4-service
+    restart: always
+    ports:
+      - "10100:8080"
+    environment:
+      - COPILOT_TOKEN=${GITHUB_COPILOT_PLUGIN_KEY}
+      - SUPER_TOKEN=${LOBE_CHAT_ACCESS_CODE}
+      - ENABLE_SUPER_TOKEN=true
+      - RATE_LIMIT=200
+
   lobe-chat:
+    depends_on:
+      - copilot-gpt4-service
     image: lobehub/lobe-chat
     container_name: lobe-chat
     restart: always
     ports:
       - "10101:3210"
     environment:
+      # If you don't choose hack
       # - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
-      - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
-      - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
+      # - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
+      # - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
+
+      # hack github copilot to gpt4
+      - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
+      - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
       - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
-      - DEFAULT_AGENT_CONFIG=model=gpt-3.5-turbo;enableHistoryCount=true;historyCount=3;params.max_tokens=1000;
+      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=5;params.max_tokens=2000;customModelName=gpt-4
