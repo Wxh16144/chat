@@ -1,6 +1,6 @@
 #!/bin/bash
  
-Pull the latest image and store the output in a variable
+# Pull the latest image and store the output in a variable
 output=$(docker pull lobehub/lobe-chat:latest 2>&1)
  
 # Check if the pull command was executed successfully
