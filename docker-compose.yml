@@ -12,3 +12,4 @@ services:
       - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
       - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
       - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
+      - DEFAULT_AGENT_CONFIG=model=gpt-3.5-turbo;enableHistoryCount=true;historyCount=3;params.max_tokens=1000;
