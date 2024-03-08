@@ -31,4 +31,4 @@ services:
       - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
       - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
       - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
-      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=5;params.max_tokens=2000;customModelName=gpt-4
+      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=5;params.max_tokens=5000;
