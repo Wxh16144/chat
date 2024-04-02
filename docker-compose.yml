@@ -28,7 +28,14 @@ services:
       # - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
 
       # hack github copilot to gpt4
+      - CUSTOM_MODELS=-all,+gpt-3.5-turbo,+gpt-4
       - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
       - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
       - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
       - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=5;params.max_tokens=5000;
+
+      # google gemini
+      - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
+      # ollama
+      - OLLAMA_PROXY_URL=http://host.docker.internal:11434/v1
+      - OLLAMA_CUSTOM_MODELS=-all,+qwen:14b
