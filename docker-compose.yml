@@ -32,7 +32,9 @@ services:
       - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
       - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
       - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
-      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=5;params.max_tokens=5000;
+
+      # openai
+      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=10;params.max_tokens=15000;
 
       # google gemini
       - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
@@ -40,4 +42,3 @@ services:
       - OLLAMA_PROXY_URL=http://host.docker.internal:11434/v1
       - OLLAMA_MODEL_LIST=-all,+qwen:14b
 
-      
