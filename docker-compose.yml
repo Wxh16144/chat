@@ -41,4 +41,6 @@ services:
       # ollama
       - OLLAMA_PROXY_URL=http://host.docker.internal:11434/v1
       - OLLAMA_MODEL_LIST=-all,+qwen:14b
+      # 智谱AI
+      - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
 
