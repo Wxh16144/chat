@@ -1,21 +1,21 @@
 version: "3.8"
 
 services:
-  copilot-gpt4-service:
-    image: aaamoon/copilot-gpt4-service:latest
-    container_name: copilot-gpt4-service
-    restart: always
-    ports:
-      - "10100:8080"
-    environment:
-      - COPILOT_TOKEN=${GITHUB_COPILOT_PLUGIN_KEY}
-      - SUPER_TOKEN=${LOBE_CHAT_ACCESS_CODE}
-      - ENABLE_SUPER_TOKEN=true
-      - RATE_LIMIT=200
+  # copilot-gpt4-service:
+  #   image: aaamoon/copilot-gpt4-service:latest
+  #   container_name: copilot-gpt4-service
+  #   restart: always
+  #   ports:
+  #     - "10100:8080"
+  #   environment:
+  #     - COPILOT_TOKEN=${GITHUB_COPILOT_PLUGIN_KEY}
+  #     - SUPER_TOKEN=${LOBE_CHAT_ACCESS_CODE}
+  #     - ENABLE_SUPER_TOKEN=true
+  #     - RATE_LIMIT=200
 
   lobe-chat:
-    depends_on:
-      - copilot-gpt4-service
+    # depends_on:
+    #   - copilot-gpt4-service
     image: lobehub/lobe-chat
     container_name: lobe-chat
     restart: always
@@ -28,19 +28,20 @@ services:
       # - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
 
       # hack github copilot to gpt4
-      - OPENAI_MODEL_LIST=-all,+gpt-3.5-turbo,+gpt-4
-      - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
-      - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
-      - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
+      # - OPENAI_MODEL_LIST=-all,+gpt-3.5-turbo,+gpt-4
+      # - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
+      # - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
+      # - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
 
       # openai
-      - DEFAULT_AGENT_CONFIG=model=gpt-4;enableHistoryCount=true;historyCount=10;params.max_tokens=15000;
+      - DEFAULT_AGENT_CONFIG=model=qwen:14b;enableHistoryCount=true;historyCount=5;params.max_tokens=8000;
 
       # google gemini
       - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
       # ollama
-      - OLLAMA_PROXY_URL=http://host.docker.internal:11434/v1
+      - OLLAMA_PROXY_URL=http://host.docker.internal:11434
       - OLLAMA_MODEL_LIST=-all,+qwen:14b
       # 智谱AI
       - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
-
+      # 付费 qwen
+      - QWEN_API_KEY=${ALIYUN_DASHSCOPE_API_KEY}
