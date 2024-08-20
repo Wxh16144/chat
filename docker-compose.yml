@@ -23,9 +23,9 @@ services:
       - "10101:3210"
     environment:
       # If you don't choose hack
-      # - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
-      # - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
-      # - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
+      - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
+      - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
+      - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
 
       # hack github copilot to gpt4
       # - OPENAI_MODEL_LIST=-all,+gpt-3.5-turbo,+gpt-4
@@ -34,13 +34,13 @@ services:
       # - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
 
       # openai
-      - DEFAULT_AGENT_CONFIG=model=qwen:14b;enableHistoryCount=true;historyCount=5;params.max_tokens=8000;
+      - DEFAULT_AGENT_CONFIG=provider=ollama;model=qwen2:7b;enableHistoryCount=true;historyCount=5;params.max_tokens=8000;fetchOnClient=true;
 
       # google gemini
       - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
       # ollama
       - OLLAMA_PROXY_URL=http://host.docker.internal:11434
-      - OLLAMA_MODEL_LIST=-all,+qwen:14b
+      - OLLAMA_MODEL_LIST=-all,+qwen2:7b
       # 智谱AI
       - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
       # 付费 qwen
