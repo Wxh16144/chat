@@ -36,6 +36,9 @@ services:
       # openai
       - DEFAULT_AGENT_CONFIG=provider=ollama;model=qwen2:7b;enableHistoryCount=true;historyCount=5;params.max_tokens=8000;fetchOnClient=true;
 
+      # - SYSTEM_AGENT=provider=ollama;model=qwen2:7b;
+      - SYSTEM_AGENT=topic=ollama/qwen2:7b,agentMeta=ollama/qwen2:7b,queryRewrite=ollama/qwen2:7b,translation=ollama/qwen2:7b
+
       # google gemini
       - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
       # ollama
