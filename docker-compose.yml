@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   # copilot-gpt4-service:
   #   image: aaamoon/copilot-gpt4-service:latest
@@ -13,17 +11,107 @@ services:
   #     - ENABLE_SUPER_TOKEN=true
   #     - RATE_LIMIT=200
 
+  network-service:
+    image: alpine
+    container_name: lobe-network
+    ports:
+      - ${MINIO_PORT:-9000}:${MINIO_PORT:-9000} # MinIO API
+      - 9001:9001 # MinIO Console
+      - ${LOGTO_PORT:-3001}:${LOGTO_PORT:-3001} # Logto
+      - 3002:3002 # Logto Admin
+      - ${LOBE_PORT:-3210}:3210 # LobeChat
+    command: tail -f /dev/null
+    networks:
+      - lobe-network
+
+  postgresql:
+    image: pgvector/pgvector:pg16
+    container_name: lobe-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./data:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_DB=${LOBE_DB_NAME:-lobechat}
+      - POSTGRES_PASSWORD=${LOBE_POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - lobe-network
+
+  minio:
+    image: minio/minio
+    container_name: lobe-minio
+    network_mode: "service:network-service"
+    volumes:
+      - "./s3_data:/etc/minio/data"
+    environment:
+      - MINIO_ROOT_USER=${LOBE_MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${LOBE_MINIO_ROOT_PASSWORD}
+      - MINIO_API_CORS_ALLOW_ORIGIN=http://localhost:${LOBE_PORT:-3210}
+    restart: always
+    command: >
+      server /etc/minio/data --address ":${MINIO_PORT:-9000}" --console-address ":9001"
+
+  logto:
+    image: svhd/logto
+    container_name: lobe-logto
+    network_mode: "service:network-service"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      - TRUST_PROXY_HEADER=1
+      - PORT=${LOGTO_PORT:-3001}
+      - DB_URL=postgresql://postgres:${LOBE_POSTGRES_PASSWORD}@postgresql:5432/logto
+      - ENDPOINT=http://localhost:${LOGTO_PORT:-3001}
+      - ADMIN_ENDPOINT=http://localhost:3002
+    entrypoint: ["sh", "-c", "npm run cli db seed -- --swe && npm start"]
+
   lobe-chat:
     # depends_on:
     #   - copilot-gpt4-service
-    image: lobehub/lobe-chat
-    container_name: lobe-chat
+    # image: lobehub/lobe-chat
+    image: lobehub/lobe-chat-database
+    container_name: lobe-chat-database
     restart: always
-    ports:
-      - "10101:3210"
+    network_mode: 'service:network-service'
+    depends_on:
+      postgresql:
+        condition: service_healthy
+      network-service:
+        condition: service_started
+      minio:
+        condition: service_started
+      logto:
+        condition: service_started
+
     environment:
+      - APP_URL=http://localhost:3210
+      - NEXT_AUTH_SSO_PROVIDERS=logto
+      - KEY_VAULTS_SECRET=${LOBE_KEY_VAULTS_SECRET} # 用于加密用户存储的 apikey 等敏感信息。
+      - NEXT_AUTH_SECRET=${LOBE_NEXT_AUTH_SECRET} # 用于加密 Auth.js 会话令牌的密钥。
+      - NEXTAUTH_URL=http://localhost:${LOBE_PORT:-3210}/api/auth
+      - AUTH_LOGTO_ISSUER=http://localhost:${LOGTO_PORT:-3001}/oidc
+
+      - LOGTO_CLIENT_ID=${LOGTO_CLIENT_ID}
+      - LOGTO_CLIENT_SECRET=${LOGTO_CLIENT_SECRET}
+
+      # S3: MinIO
+      - DATABASE_URL=postgresql://postgres:${LOBE_POSTGRES_PASSWORD}@postgresql:5432/${LOBE_DB_NAME:-lobechat}
+      - S3_ACCESS_KEY_ID=${LOBE_S3_ACCESS_KEY_ID}
+      - S3_SECRET_ACCESS_KEY=${LOBE_S3_SECRET_ACCESS_KEY}
+      - S3_ENDPOINT=http://localhost:${MINIO_PORT:-9000}
+      - S3_BUCKET=${MINIO_LOBE_BUCKET:-lobe}
+      - S3_PUBLIC_DOMAIN=http://localhost:${MINIO_PORT:-9000}
+      - S3_ENABLE_PATH_STYLE=1
+
       # If you don't choose hack
-      - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
+      # - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
       - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
       - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
 
@@ -48,3 +136,13 @@ services:
       - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
       # 付费 qwen
       - QWEN_API_KEY=${ALIYUN_DASHSCOPE_API_KEY}
+
+volumes:
+  data:
+    driver: local
+  s3_data:
+    driver: local
+
+networks:
+  lobe-network:
+    driver: bridge
