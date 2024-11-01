@@ -91,7 +91,7 @@ services:
         condition: service_started
 
     environment:
-      - APP_URL=http://localhost:3210
+      - APP_URL=http://localhost:${LOBE_PORT:-3210}
       - NEXT_AUTH_SSO_PROVIDERS=logto
       - KEY_VAULTS_SECRET=${LOBE_KEY_VAULTS_SECRET} # 用于加密用户存储的 apikey 等敏感信息。
       - NEXT_AUTH_SECRET=${LOBE_NEXT_AUTH_SECRET} # 用于加密 Auth.js 会话令牌的密钥。
@@ -136,6 +136,9 @@ services:
       - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
       # 付费 qwen
       - QWEN_API_KEY=${ALIYUN_DASHSCOPE_API_KEY}
+
+      # https://github.com/lobehub/lobe-chat/discussions/4515
+      - FEATURE_FLAGS=+pin_list
 
 volumes:
   data:
