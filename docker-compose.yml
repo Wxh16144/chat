@@ -58,7 +58,7 @@ services:
       server /etc/minio/data --address ":${MINIO_PORT:-9000}" --console-address ":9001"
 
   logto:
-    image: svhd/logto
+    image: svhd/logto:1.20.0
     container_name: lobe-logto
     network_mode: "service:network-service"
     depends_on:
