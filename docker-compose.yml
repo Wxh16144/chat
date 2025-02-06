@@ -76,10 +76,11 @@ services:
     # depends_on:
     #   - copilot-gpt4-service
     # image: lobehub/lobe-chat
-    image: lobehub/lobe-chat-database
+    image: lobehub/lobe-chat-database:latest
     container_name: lobe-chat-database
     restart: always
     network_mode: 'service:network-service'
+    env_file: lobe-chat.env
     depends_on:
       postgresql:
         condition: service_healthy
@@ -89,56 +90,6 @@ services:
         condition: service_started
       logto:
         condition: service_started
-
-    environment:
-      - APP_URL=http://localhost:${LOBE_PORT:-3210}
-      - NEXT_AUTH_SSO_PROVIDERS=logto
-      - KEY_VAULTS_SECRET=${LOBE_KEY_VAULTS_SECRET} # 用于加密用户存储的 apikey 等敏感信息。
-      - NEXT_AUTH_SECRET=${LOBE_NEXT_AUTH_SECRET} # 用于加密 Auth.js 会话令牌的密钥。
-      - NEXTAUTH_URL=http://localhost:${LOBE_PORT:-3210}/api/auth
-      - AUTH_LOGTO_ISSUER=http://localhost:${LOGTO_PORT:-3001}/oidc
-
-      - LOGTO_CLIENT_ID=${LOGTO_CLIENT_ID}
-      - LOGTO_CLIENT_SECRET=${LOGTO_CLIENT_SECRET}
-
-      # S3: MinIO
-      - DATABASE_URL=postgresql://postgres:${LOBE_POSTGRES_PASSWORD}@postgresql:5432/${LOBE_DB_NAME:-lobechat}
-      - S3_ACCESS_KEY_ID=${LOBE_S3_ACCESS_KEY_ID}
-      - S3_SECRET_ACCESS_KEY=${LOBE_S3_SECRET_ACCESS_KEY}
-      - S3_ENDPOINT=http://localhost:${MINIO_PORT:-9000}
-      - S3_BUCKET=${MINIO_LOBE_BUCKET:-lobe}
-      - S3_PUBLIC_DOMAIN=http://localhost:${MINIO_PORT:-9000}
-      - S3_ENABLE_PATH_STYLE=1
-
-      # If you don't choose hack
-      # - HTTPS_PROXY=${LOBE_CLIENT_HTTP_PROXY}
-      - OPENAI_API_KEY=${LOBE_CHAT_OPENAI_TOKEN}
-      - OPENAI_PROXY_URL=${LOBE_CHAT_OPENAI_PROXY_URL}
-
-      # hack github copilot to gpt4
-      # - OPENAI_MODEL_LIST=-all,+gpt-3.5-turbo,+gpt-4
-      # - OPENAI_API_KEY=${LOBE_CHAT_ACCESS_CODE}
-      # - OPENAI_PROXY_URL=http://copilot-gpt4-service:8080/v1
-      # - ACCESS_CODE=${LOBE_CHAT_ACCESS_CODE:-lobe66}
-
-      # openai
-      - DEFAULT_AGENT_CONFIG=provider=ollama;model=qwen2:7b;enableHistoryCount=true;historyCount=5;params.max_tokens=8000;fetchOnClient=true;
-
-      # - SYSTEM_AGENT=provider=ollama;model=qwen2:7b;
-      - SYSTEM_AGENT=topic=ollama/qwen2:7b,agentMeta=ollama/qwen2:7b,queryRewrite=ollama/qwen2:7b,translation=ollama/qwen2:7b
-
-      # google gemini
-      - GOOGLE_API_KEY=${GOOGLE_GEMINI_API_KEY}
-      # ollama
-      - OLLAMA_PROXY_URL=http://host.docker.internal:11434
-      - OLLAMA_MODEL_LIST=-all,+qwen2:7b
-      # 智谱AI
-      - ZHIPU_API_KEY=${OFFICIAL_ZHIPU_TOKEN}
-      # 付费 qwen
-      - QWEN_API_KEY=${ALIYUN_DASHSCOPE_API_KEY}
-
-      # https://github.com/lobehub/lobe-chat/discussions/4515
-      - FEATURE_FLAGS=+pin_list
 
 volumes:
   data:
